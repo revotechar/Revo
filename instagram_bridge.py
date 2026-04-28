@@ -80,7 +80,15 @@ def recibir_mensaje():
                     respuesta = procesar_mensaje(sender_id, mensaje)
                     enviar_respuesta(sender_id, respuesta)
     return jsonify({"status": "ok"}), 200
-
+@app.route("/privacy", methods=["GET"])
+def privacy():
+    return """
+    <h1>Política de Privacidad — REVO Agente</h1>
+    <p>Revotech SRL opera este servicio de mensajería automatizada.</p>
+    <p>Los mensajes enviados a través de Instagram son procesados para brindar atención al cliente.</p>
+    <p>No compartimos datos personales con terceros.</p>
+    <p>Para consultas: revotech.ar@gmail.com</p>
+    """, 200
 @app.route("/", methods=["GET"])
 def home():
     return "REVO Agente activo", 200

@@ -5,20 +5,21 @@ import os
 import sys
 import json
 import requests
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import anthropic
 from agente import SYSTEM_PROMPT, TOOLS, ejecutar_herramienta, BIENVENIDA
 
 app = Flask(__name__)
+app.config['JSON_AS_ASCII'] = False  # Fix acentos en respuestas JSON
 client = anthropic.Anthropic()
 
 IG_TOKEN = os.environ.get("IG_TOKEN", "")
 VERIFY_TOKEN = "revo_webhook_token"
 conversaciones: dict = {}
 
-def procesar_mensaje(sender_id: str, texto: str) -> str:
+def procesar_mensaje(sender_id: str, texto: str) -> list[str]:
     if sender_id not in conversaciones:
         conversaciones[sender_id] = [{"role": "assistant", "content": BIENVENIDA}]
     messages = conversaciones[sender_id]
@@ -37,7 +38,9 @@ def procesar_mensaje(sender_id: str, texto: str) -> str:
                 if bloque.type == "text":
                     texto_respuesta = bloque.text
             messages.append({"role": "assistant", "content": respuesta.content})
-            return texto_respuesta
+            # Separar en múltiples mensajes por [MSG]
+            partes = [p.strip() for p in texto_respuesta.split("[MSG]") if p.strip()]
+            return partes if partes else [texto_respuesta]
         elif respuesta.stop_reason == "tool_use":
             messages.append({"role": "assistant", "content": respuesta.content})
             resultados = []
@@ -47,7 +50,7 @@ def procesar_mensaje(sender_id: str, texto: str) -> str:
                     resultados.append({"type": "tool_result", "tool_use_id": bloque.id, "content": resultado})
             messages.append({"role": "user", "content": resultados})
         else:
-            return "Disculpa, hubo un error. Por favor escribinos de nuevo."
+            return ["Disculpá, hubo un error. Por favor escribinos de nuevo."]
 
 def enviar_respuesta(recipient_id: str, texto: str):
     url = f"https://graph.instagram.com/v21.0/me/messages"
@@ -57,7 +60,7 @@ def enviar_respuesta(recipient_id: str, texto: str):
         "messaging_type": "RESPONSE",
         "access_token": IG_TOKEN
     }
-    requests.post(url, json=payload)
+    requests.post(url, json=payload, headers={"Content-Type": "application/json; charset=utf-8"})
 
 @app.route("/webhook", methods=["GET"])
 def verificar_webhook():
@@ -77,8 +80,9 @@ def recibir_mensaje():
                 sender_id = event.get("sender", {}).get("id")
                 mensaje = event.get("message", {}).get("text", "")
                 if sender_id and mensaje:
-                    respuesta = procesar_mensaje(sender_id, mensaje)
-                    enviar_respuesta(sender_id, respuesta)
+                    respuestas = procesar_mensaje(sender_id, mensaje)
+                    for parte in respuestas:
+                        enviar_respuesta(sender_id, parte)
     return jsonify({"status": "ok"}), 200
 @app.route("/privacy", methods=["GET"])
 def privacy():

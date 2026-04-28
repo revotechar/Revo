@@ -1,0 +1,91 @@
+{
+  "empresa": "REVO",
+  "razon_social": "Revotech SRL",
+  "web": "revotech.com.ar",
+  "instagram": "@revomen.ar",
+  "email": "revotech.ar@gmail.com",
+  "eslogan": "Empeza a ocuparte.",
+  "canal": "ecommerce",
+  "atencion": "24/7",
+  "envio_gratis_desde": 99000,
+  "descuento_transferencia": 0.10,
+  "costo_envio": 9800,
+  "envio_plazo": "3 a 7 dias habiles",
+  "envio_zona": "toda Argentina",
+  "productos": [
+    {
+      "id": "BR1",
+      "nombre": "Serum Capilar REVO",
+      "tipo": "uso_topico",
+      "descripcion": "Estimulo topico folicular. Aplicacion directa en cuero cabelludo.",
+      "ingredientes": ["Cafeina", "Niacinamida", "Ginseng", "Extracto de Ortiga", "Capixyl", "Baicapil"],
+      "precio": 45900,
+      "stock": true,
+      "certificacion": "ANMAT",
+      "aprobado_dermatologos": true
+    },
+    {
+      "id": "CR1",
+      "nombre": "Capsulas REVO",
+      "tipo": "uso_interno",
+      "descripcion": "Soporte interno para la salud capilar desde adentro.",
+      "ingredientes": ["L-Cistina", "L-Metionina", "L-Prolina", "Vitamina B5", "Biotina", "Acido Folico"],
+      "precio": 52900,
+      "stock": true,
+      "certificacion": "ANMAT",
+      "aprobado_dermatologos": true
+    },
+    {
+      "id": "KIT1MES",
+      "nombre": "Kit 1 Mes",
+      "tipo": "kit",
+      "descripcion": "Introduccion al sistema REVO. Incluye serum, capsulas y 3 eBooks de guia.",
+      "contenido": ["1x BR1 - Serum Capilar", "1x CR1 - Capsulas", "3 eBooks guia", "Seguimiento"],
+      "precio": 79900,
+      "stock": true,
+      "incluye_garantia": false,
+      "certificacion": "ANMAT",
+      "aprobado_dermatologos": true
+    },
+    {
+      "id": "KIT90D",
+      "nombre": "Kit 90 Dias",
+      "tipo": "kit",
+      "descripcion": "El tratamiento completo de 3 meses. Producto estrella con garantia de devolucion total.",
+      "contenido": ["3x BR1 - Serum Capilar", "3x CR1 - Capsulas", "3 eBooks guia", "Seguimiento personalizado", "Garantia 90 dias"],
+      "precio": 199900,
+      "precio_por_dia": 2221,
+      "stock": true,
+      "incluye_garantia": true,
+      "envio_gratis": true,
+      "promo_lanzamiento": {
+        "activa": true,
+        "descuento": 0.15,
+        "descripcion": "15% off para los primeros 100 clientes"
+      },
+      "certificacion": "ANMAT",
+      "aprobado_dermatologos": true
+    }
+  ],
+  "garantia_kit90d": {
+    "cobertura": "Devolucion 100% del dinero",
+    "condiciones": [
+      "Consumir los 6 productos completos (3x BR1 + 3x CR1)",
+      "Enviar foto del cuero cabelludo el Dia 1 (dentro de los primeros 7 dias)",
+      "Reclamar entre el Dia 80 y el Dia 100"
+    ],
+    "exclusiones": [
+      "Productos individuales",
+      "Uso incompleto del tratamiento",
+      "Condiciones medicas preexistentes (alopecia avanzada, tratamiento oncologico, enfermedades autoinmunes)"
+    ]
+  },
+  "seguimiento_post_compra": {
+    "dia_1": "Solicitar foto de inicio del cuero cabelludo (obligatorio para garantia)",
+    "dia_7": "Check-in de adherencia al tratamiento",
+    "dia_14": "Seguimiento programado",
+    "dia_30": "Seguimiento programado",
+    "dia_60": "Seguimiento programado",
+    "dia_90": "Seguimiento final y evaluacion de resultados"
+  }
+}

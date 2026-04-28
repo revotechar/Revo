@@ -1,0 +1,93 @@
+{
+  "prueba": {
+    "id": "prueba",
+    "nombre": null,
+    "canal": "terminal",
+    "estado": "compro",
+    "paso_secuencia": 1,
+    "historial": [
+      {
+        "rol": "assistant",
+        "mensaje": "Hola, soy el asistente de REVO. En que te puedo ayudar?",
+        "timestamp": "2026-04-27T20:26:18.813724"
+      },
+      {
+        "rol": "user",
+        "mensaje": "hola como estas? tengo caida de cabello, y se me ve el cuero cabelludo en algunas zonas ya",
+        "timestamp": "2026-04-27T20:26:43.060543"
+      },
+      {
+        "rol": "assistant",
+        "mensaje": "Hola, todo bien. Lamento lo que me contas, pero tranquilo que se puede trabajar.\n\n[MSG] Una pregunta: hace cuanto que notas la caida? Es progresiva o fue de golpe?",
+        "timestamp": "2026-04-27T20:26:45.788978"
+      },
+      {
+        "rol": "user",
+        "mensaje": "yy hace unos años diria yo, no recuerdo exactamente",
+        "timestamp": "2026-04-27T20:27:08.806325"
+      },
+      {
+        "rol": "assistant",
+        "mensaje": "Entiendo. Si es progresiva de varios años, lo mas probable es alopecia androgenetica. La buena noticia: el foliculo no desaparece, se apaga. Todavia hay margen.\n\n[MSG] Tuviste algun diagnostico medico o probaste algo antes (minoxidil, finasteride, shampoos)?",
+        "timestamp": "2026-04-27T20:27:12.260493"
+      },
+      {
+        "rol": "user",
+        "mensaje": "no nada, algunos shampoo y serums... pero sin resultados",
+        "timestamp": "2026-04-27T20:27:31.303689"
+      },
+      {
+        "rol": "assistant",
+        "mensaje": "Tipico. Eso eran productos sueltos, no un sistema. Por eso no funcionaron.\n\n[MSG] REVO trabaja en dos frentes a la vez: BR1 actua sobre el foliculo desde afuera, CR1 da soporte interno desde adentro. Es un sistema de 90 dias, no un producto mas.\n\n[MSG] Y lo importante: el Kit 90D tiene garantia de devolucion total. Si no ves resultados, te devolvemos el 100%. Te paso las condiciones?",
+        "timestamp": "2026-04-27T20:27:35.088388"
+      },
+      {
+        "rol": "user",
+        "mensaje": "cuanto sale?",
+        "timestamp": "2026-04-27T20:28:38.099642"
+      },
+      {
+        "rol": "assistant",
+        "mensaje": "Kit 90D: precio lista $199.900. Con 15% promo + 10% por transferencia te queda en $152.924. Envio gratis.\n\n[MSG] Son $2.221 por dia con garantia de devolucion total. Una sola vez, no es algo que tengas que repetir todos los meses.",
+        "timestamp": "2026-04-27T20:28:44.013753"
+      },
+      {
+        "rol": "user",
+        "mensaje": "y cada mes mejora mas? o 3 meses es el maximo?",
+        "timestamp": "2026-04-27T20:30:49.607431"
+      },
+      {
+        "rol": "assistant",
+        "mensaje": "90 dias es el ciclo minimo para evaluar resultados, porque el foliculo necesita ese tiempo para responder. Muchos clientes siguen mas alla para consolidar.\n\n[MSG] Pero la decision la tomas vos al dia 90 con resultados a la vista. Si no ves cambios, te devolvemos el 100%.\n\n[MSG] Te lo dejo facil: queres que te pase el link para cerrarlo con la promo?",
+        "timestamp": "2026-04-27T20:30:55.278828"
+      },
+      {
+        "rol": "user",
+        "mensaje": "dale",
+        "timestamp": "2026-04-27T20:31:04.755034"
+      },
+      {
+        "rol": "assistant",
+        "mensaje": "Genial. Entras a revotech.com.ar, elegis Kit 90D y al pagar por transferencia se aplican los dos descuentos automaticamente.\n\n[MSG] Cuando tengas el comprobante me lo mandas por aca y seguimos con los datos de envio. Cualquier duda en el proceso, me avisas.",
+        "timestamp": "2026-04-27T20:31:08.710265"
+      },
+      {
+        "rol": "user",
+        "mensaje": "python C:\\Users\\hp\\AUTOSEBA\\dashboard_gen.py",
+        "timestamp": "2026-04-27T20:33:09.435636"
+      },
+      {
+        "rol": "assistant",
+        "mensaje": "Eso parece un comando de consola, no un mensaje para mi. Te lo mandaste a vos quizas?\n\n[MSG] Cualquier duda con la compra del Kit, me avisas y seguimos.",
+        "timestamp": "2026-04-27T20:33:12.098195"
+      }
+    ],
+    "mensajes_total": 15,
+    "primera_consulta": "2026-04-27T20:26:18.788683",
+    "ultima_actividad": "2026-04-27T20:33:12.098195",
+    "compro": true,
+    "producto_comprado": null,
+    "precio_pagado": null,
+    "notas": ""
+  }
+}

@@ -1,5 +1,9 @@
-﻿import os
+"""
+instagram_bridge.py — Webhook Flask para recibir DMs de Instagram
+"""
+import os
 import sys
+import json
 import requests
 from flask import Flask, request, jsonify
 
@@ -12,9 +16,9 @@ client = anthropic.Anthropic()
 
 IG_TOKEN = os.environ.get("IG_TOKEN", "")
 VERIFY_TOKEN = "revo_webhook_token"
-conversaciones = {}
+conversaciones: dict = {}
 
-def procesar_mensaje(sender_id, texto):
+def procesar_mensaje(sender_id: str, texto: str) -> str:
     if sender_id not in conversaciones:
         conversaciones[sender_id] = [{"role": "assistant", "content": BIENVENIDA}]
     messages = conversaciones[sender_id]
@@ -43,11 +47,16 @@ def procesar_mensaje(sender_id, texto):
                     resultados.append({"type": "tool_result", "tool_use_id": bloque.id, "content": resultado})
             messages.append({"role": "user", "content": resultados})
         else:
-            return "Disculpa, hubo un error."
+            return "Disculpa, hubo un error. Por favor escribinos de nuevo."
 
-def enviar_respuesta(recipient_id, texto):
-    url = "https://graph.instagram.com/v21.0/me/messages"
-    payload = {"recipient": {"id": recipient_id}, "message": {"text": texto}, "messaging_type": "RESPONSE", "access_token": IG_TOKEN}
+def enviar_respuesta(recipient_id: str, texto: str):
+    url = f"https://graph.instagram.com/v21.0/me/messages"
+    payload = {
+        "recipient": {"id": recipient_id},
+        "message": {"text": texto},
+        "messaging_type": "RESPONSE",
+        "access_token": IG_TOKEN
+    }
     requests.post(url, json=payload)
 
 @app.route("/webhook", methods=["GET"])

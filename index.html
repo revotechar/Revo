@@ -3,171 +3,329 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <link rel="icon" type="image/x-icon" href="favicon.ico">
 <title>REVO — Rendimiento Capilar Masculino</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --negro: #000000;
+    --naranja: #e85002;
+    --blanco: #F9F9F9;
+    --gris-claro: #A7A7A7;
+    --gris-medio: #646464;
+    --gris-oscuro: #1a1a1a;
+  }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    background: #000;
-    color: #F9F9F9;
     font-family: 'Montserrat', sans-serif;
+    background: var(--negro);
+    color: var(--blanco);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 2rem 1.5rem;
+    justify-content: space-between;
+    padding: 48px 24px 32px;
+    overflow-x: hidden;
   }
-  .container { max-width: 560px; width: 100%; text-align: center; }
-  .logo {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.35em;
-    color: #646464;
-    text-transform: uppercase;
-    margin-bottom: 3rem;
+  body::before {
+    content: '';
+    position: fixed;
+    top: -300px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 800px;
+    height: 800px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(232,80,2,0.06) 0%, transparent 65%);
+    pointer-events: none;
+    z-index: 0;
   }
-  .logo span { color: #e85002; }
-  h1 {
-    font-size: clamp(2rem, 6vw, 3rem);
-    font-weight: 700;
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-    margin-bottom: 1.5rem;
-  }
-  h1 em { color: #e85002; font-style: normal; }
-  .subtitle { font-size: 15px; color: #646464; line-height: 1.7; margin-bottom: 2.5rem; }
-  .divider { width: 32px; height: 2px; background: #e85002; margin: 0 auto 2.5rem; }
-  .offer-box {
-    border: 1px solid #1a1a1a;
-    border-left: 2px solid #e85002;
-    padding: 1.25rem 1.5rem;
-    text-align: left;
-    margin-bottom: 2.5rem;
-  }
-  .offer-box p { font-size: 13px; color: #A7A7A7; line-height: 1.6; }
-  .offer-box strong { color: #F9F9F9; font-weight: 600; }
-  .bullets { display: flex; flex-direction: column; gap: 10px; margin-bottom: 3rem; text-align: left; }
-  .bullet { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: #646464; }
-  .bullet-dot { width: 6px; height: 6px; background: #e85002; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
-  .form-group { display: flex; flex-direction: column; gap: 12px; margin-bottom: 1rem; }
-  input {
-    background: #0a0a0a;
-    border: 1px solid #1f1f1f;
-    color: #F9F9F9;
-    padding: 14px 16px;
-    font-size: 14px;
-    font-family: 'Montserrat', sans-serif;
-    outline: none;
-    transition: border-color 0.2s;
+  header {
     width: 100%;
-    -webkit-appearance: none;
-    border-radius: 0;
+    max-width: 560px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 1;
   }
-  input::placeholder { color: #444; }
-  input:focus { border-color: #e85002; }
-  button {
-    background: #e85002;
-    color: #fff;
-    border: none;
-    padding: 16px;
+  .logo-wrapper { margin-bottom: 20px; }
+  .logo-wrapper img {
+    height: 44px;
+    width: auto;
+    display: block;
+    filter: brightness(0) invert(1);
+  }
+  .brand-line {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--naranja);
+    text-align: center;
+  }
+  main {
+    width: 100%;
+    max-width: 560px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    justify-content: center;
+    padding: 40px 0;
+  }
+  .headline {
+    font-size: clamp(36px, 9vw, 58px);
+    font-weight: 900;
+    line-height: 1.0;
+    letter-spacing: -1px;
+    text-transform: uppercase;
+    color: var(--blanco);
+    text-align: center;
+    margin-bottom: 6px;
+  }
+  .headline em {
+    font-style: normal;
+    color: var(--naranja);
+    display: block;
+  }
+  .divider {
+    width: 32px;
+    height: 2px;
+    background: var(--naranja);
+    margin: 24px auto;
+  }
+  .subhead {
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.75;
+    color: var(--gris-claro);
+    text-align: center;
+    max-width: 420px;
+    margin: 0 auto 32px;
+  }
+  .bullets {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 40px;
+    width: 100%;
+    max-width: 400px;
+  }
+  .bullets li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--gris-claro);
+    letter-spacing: 0.3px;
+    line-height: 1.5;
+  }
+  .bullets li::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--naranja);
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+  .form-box {
+    width: 100%;
+    max-width: 480px;
+    border: 1px solid #222;
+    padding: 28px 28px 24px;
+    background: rgba(255,255,255,0.02);
+  }
+  .form-box-title {
     font-size: 13px;
     font-weight: 700;
-    letter-spacing: 0.12em;
+    letter-spacing: 1px;
     text-transform: uppercase;
-    font-family: 'Montserrat', sans-serif;
-    cursor: pointer;
+    color: var(--blanco);
+    margin-bottom: 6px;
+  }
+  .form-box-sub {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--gris-medio);
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+  .form-field {
     width: 100%;
-    transition: background 0.2s;
+    background: #0d0d0d;
+    border: 1px solid #2a2a2a;
+    color: var(--blanco);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
     border-radius: 0;
   }
-  button:hover { background: #c94402; }
-  button:disabled { background: #333; cursor: not-allowed; }
-  .disclaimer { font-size: 11px; color: #333; margin-top: 1rem; line-height: 1.6; }
+  .form-field::placeholder { color: #444; }
+  .form-field:focus { border-color: #444; }
+  .btn-submit {
+    width: 100%;
+    background: var(--naranja);
+    color: white;
+    border: none;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    padding: 16px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    margin-bottom: 12px;
+    border-radius: 0;
+  }
+  .btn-submit:hover { opacity: 0.85; }
+  .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+  .form-microcopy {
+    font-size: 10px;
+    color: var(--gris-medio);
+    text-align: center;
+    letter-spacing: 0.5px;
+    line-height: 1.6;
+  }
+  .error-msg {
+    font-size: 11px;
+    color: var(--naranja);
+    margin-top: -6px;
+    margin-bottom: 10px;
+    display: none;
+  }
   .success-msg {
     display: none;
-    background: #0a0a0a;
-    border: 1px solid #1f1f1f;
-    border-left: 2px solid #e85002;
-    padding: 1.5rem;
-    text-align: left;
+    border-left: 2px solid var(--naranja);
+    padding: 16px 20px;
+    background: rgba(232,80,2,0.05);
   }
-  .success-msg p { font-size: 14px; color: #A7A7A7; line-height: 1.7; }
-  .success-msg strong { color: #F9F9F9; display: block; margin-bottom: 0.5rem; font-size: 15px; }
-  .error-msg { font-size: 12px; color: #e85002; text-align: left; display: none; margin-top: -4px; }
-  .footer { margin-top: 4rem; font-size: 11px; color: #2a2a2a; letter-spacing: 0.1em; }
-  .footer a { color: #333; text-decoration: none; transition: color 0.2s; }
-  .footer a:hover { color: #e85002; }
-  .social { margin-top: 0.75rem; font-size: 11px; }
-  .social a { color: #333; text-decoration: none; letter-spacing: 0.08em; transition: color 0.2s; }
-  .social a:hover { color: #e85002; }
+  .success-msg p {
+    font-size: 13px;
+    color: var(--gris-claro);
+    line-height: 1.7;
+  }
+  .success-msg strong {
+    color: var(--blanco);
+    display: block;
+    margin-bottom: 4px;
+    font-size: 14px;
+  }
+  footer {
+    width: 100%;
+    max-width: 560px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    z-index: 1;
+  }
+  .footer-ig {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: var(--gris-medio);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    transition: color 0.2s;
+  }
+  .footer-ig:hover { color: var(--blanco); }
+  .footer-ig svg { width: 16px; height: 16px; fill: currentColor; }
+  .footer-domain {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #2e2e2e;
+  }
+  @media (max-width: 480px) {
+    body { padding: 36px 20px 28px; }
+    .form-box { padding: 24px 20px 20px; }
+    .headline { font-size: 38px; }
+  }
 </style>
 </head>
 <body>
-<div class="container">
 
-  <div class="logo">REVO — <span>Rendimiento Capilar</span></div>
-
-  <h1>90 días.<br><em>Evidencia visible.</em><br>Sin excusas.</h1>
-
-  <div class="divider"></div>
-
-  <p class="subtitle">Estamos por lanzar el primer sistema estructurado de rendimiento capilar masculino en habla hispana. No un producto. Un protocolo.</p>
-
-  <div class="bullets">
-    <div class="bullet">
-      <div class="bullet-dot"></div>
-      <span>Sin procedimientos quirúrgicos ni recetas médicas</span>
+  <header>
+    <div class="logo-wrapper">
+      <img src="https://res.cloudinary.com/dbynnaalq/image/upload/v1777496105/tarjeta_kit-02_c82sd9.png" alt="REVO" />
     </div>
-    <div class="bullet">
-      <div class="bullet-dot"></div>
-      <span>Protocolo no invasivo — aplicás desde casa, en minutos</span>
+    <span class="brand-line">Rendimiento Capilar Masculino</span>
+  </header>
+
+  <main>
+    <h1 class="headline">
+      90 días.<br>
+      <em>Evidencia visible.</em>
+    </h1>
+
+    <div class="divider"></div>
+
+    <p class="subhead">
+      El primer sistema estructurado de rendimiento capilar masculino en habla hispana. No un producto. Un protocolo.
+    </p>
+
+    <ul class="bullets">
+      <li>Sin procedimientos quirúrgicos ni recetas médicas</li>
+      <li>Protocolo no invasivo — aplicás desde casa, en minutos</li>
+      <li>Sin efectos secundarios. Solo estructura y ciencia aplicada</li>
+    </ul>
+
+    <div class="form-box">
+      <p class="form-box-title">Acceso anticipado al lanzamiento.</p>
+      <p class="form-box-sub">Los primeros registrados acceden antes que nadie.<br>Sin spam. Un solo mensaje cuando abramos.</p>
+
+      <input class="form-field" type="tel" id="whatsapp" placeholder="Tu WhatsApp (ej: 1123456789)" />
+      <div class="error-msg" id="error-msg">Ingresá tu número de WhatsApp para continuar.</div>
+      <button class="btn-submit" id="submit-btn" onclick="submitForm()">QUIERO ACCESO ANTICIPADO</button>
+
+      <div class="success-msg" id="success-msg">
+        <p><strong>Registrado. Te avisamos primero.</strong>Cuando abramos, vas a ser de los primeros en saber. El descuento es exclusivo para esta lista.</p>
+      </div>
+
+      <p class="form-microcopy">Sin spam. Sin compartir datos. Un solo mensaje cuando lancemos.</p>
     </div>
-    <div class="bullet">
-      <div class="bullet-dot"></div>
-      <span>Sin efectos secundarios. Solo estructura y ciencia aplicada</span>
-    </div>
-  </div>
+  </main>
 
-  <div class="offer-box">
-    <p><strong>Anotate antes del lanzamiento.</strong><br>Los primeros registrados acceden a un descuento único que no va a repetirse. Sin spam. Un solo mensaje cuando abramos.</p>
-  </div>
+  <footer>
+    <a href="https://instagram.com/revomen.ar" target="_blank" rel="noopener" class="footer-ig">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+      </svg>
+      @revomen.ar
+    </a>
+    <span class="footer-domain">revotech.com.ar</span>
+  </footer>
 
-  <div class="form-group" id="form-group">
-    <input type="email" id="email" placeholder="Tu email (opcional)" autocomplete="email" />
-    <input type="tel" id="whatsapp" placeholder="Tu WhatsApp (opcional, ej: 1123456789)" autocomplete="tel" />
-    <div class="error-msg" id="error-msg">Ingresá al menos tu email o tu WhatsApp.</div>
-    <button id="submit-btn" onclick="submitForm()">QUIERO MI DESCUENTO DE LANZAMIENTO</button>
-  </div>
-
-  <p class="disclaimer" id="disclaimer">Sin spam. Sin compartir datos. Un solo mensaje cuando abramos.</p>
-
-  <div class="success-msg" id="success-msg">
-    <p><strong>Registrado. Te avisamos primero.</strong>Cuando abramos, vas a ser de los primeros en saber. El descuento es exclusivo para esta lista y no se va a repetir.</p>
-  </div>
-
-  <div class="footer"><a href="https://revotech.com.ar">revotech.com.ar</a></div>
-  <div class="social"><a href="https://instagram.com/revomen.ar" target="_blank">@revomen.ar</a></div>
-
-</div>
 <script>
-  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbx8FJiwkW06oqut9YsyzoYqNBxRjVu-urIPnwJzLyEmK-7GmcFnMsUrV_c_2K_4jnNDvA/exec';
+  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyl7ke4T2QlNmhFqggcpY9za9NT8CRyhFPIqFTFUFEXzGK2Lazvc5KE3KT-_OsB2rggfQ/exec';
 
   async function submitForm() {
-    const email = document.getElementById('email').value.trim();
     const whatsapp = document.getElementById('whatsapp').value.trim();
     const errorMsg = document.getElementById('error-msg');
     const btn = document.getElementById('submit-btn');
+    const successMsg = document.getElementById('success-msg');
+
     errorMsg.style.display = 'none';
 
-    if (!email && !whatsapp) {
-      errorMsg.style.display = 'block';
-      return;
-    }
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      errorMsg.textContent = 'El email no parece válido.';
+    if (!whatsapp) {
       errorMsg.style.display = 'block';
       return;
     }
@@ -180,21 +338,29 @@
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email || '', whatsapp: whatsapp || '', fecha: new Date().toLocaleString('es-AR') })
+        body: JSON.stringify({
+          whatsapp: whatsapp,
+          fecha: new Date().toLocaleString('es-AR')
+        })
       });
-      document.getElementById('form-group').style.display = 'none';
-      document.getElementById('disclaimer').style.display = 'none';
-      document.getElementById('success-msg').style.display = 'block';
+
+      document.getElementById('whatsapp').style.display = 'none';
+      btn.style.display = 'none';
+      errorMsg.style.display = 'none';
+      successMsg.style.display = 'block';
+
     } catch(err) {
       btn.disabled = false;
-      btn.textContent = 'QUIERO MI DESCUENTO DE LANZAMIENTO';
+      btn.textContent = 'QUIERO ACCESO ANTICIPADO';
       errorMsg.textContent = 'Hubo un error. Intentá de nuevo.';
       errorMsg.style.display = 'block';
     }
   }
 
-  document.getElementById('email').addEventListener('keypress', e => { if(e.key==='Enter') document.getElementById('whatsapp').focus(); });
-  document.getElementById('whatsapp').addEventListener('keypress', e => { if(e.key==='Enter') submitForm(); });
+  document.getElementById('whatsapp').addEventListener('keypress', e => {
+    if (e.key === 'Enter') submitForm();
+  });
 </script>
+
 </body>
 </html>

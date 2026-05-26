@@ -26,7 +26,7 @@ def procesar_mensaje(sender_id: str, texto: str) -> list[str]:
     messages.append({"role": "user", "content": texto})
     while True:
         respuesta = client.messages.create(
-            model="claude-opus-4-7",
+            model="claude-sonnet-4-6",
             max_tokens=1024,
             system=[{"type": "text", "text": SYSTEM_PROMPT, "cache_control": {"type": "ephemeral"}}],
             tools=TOOLS,

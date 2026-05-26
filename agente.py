@@ -1,6 +1,6 @@
 """
-REVO — Agente de Ventas v3.0
-Con memoria de leads, estado de conversacion y herramientas de catalogo
+REVO — Agente de Ventas v4.1
+Nicolás — funnel de calificación, siempre cierra en la web
 """
 
 import json
@@ -12,12 +12,18 @@ import anthropic
 
 _DIR = os.path.dirname(os.path.abspath(__file__))
 
-# ── Catalogo ──────────────────────────────────────────────────────────────────
+# ── Catálogo ──────────────────────────────────────────────────────────────────
 with open(os.path.join(_DIR, "catalogo.json"), encoding="utf-8") as _f:
     CATALOGO = json.load(_f)
 
-# ── Base de datos de leads ────────────────────────────────────────────────────
+# ── Base de datos de leads ─────────────────────────────────────────────────────
 LEADS_FILE = os.path.join(_DIR, "leads.json")
+LIMITE_MENSAJES = 6
+
+MENSAJE_LIMITE = (
+    "Mirá, lo mejor que puedo hacer es mandarte acá donde tenés todo — "
+    "revotech.com.ar. Ahí encontrás los detalles, los resultados y podés comprar."
+)
 
 
 def cargar_leads() -> dict:
@@ -48,6 +54,7 @@ def get_lead(leads: dict, lead_id: str) -> dict:
             "producto_comprado": None,
             "precio_pagado": None,
             "notas": "",
+            "limite_alcanzado": False,
         }
     return leads[lead_id]
 
@@ -62,136 +69,83 @@ def actualizar_estado_lead(lead: dict, rol: str, texto: str) -> None:
     lead["ultima_actividad"] = datetime.now().isoformat()
 
 
-# ── Cliente Anthropic ─────────────────────────────────────────────────────────
+# ── Cliente Anthropic ──────────────────────────────────────────────────────────
 client = anthropic.Anthropic()
 
-# ── Modo prelanzamiento ───────────────────────────────────────────────────────
-MODO_PRELANZAMIENTO = True
-FECHA_LANZAMIENTO = "60 dias"
-WEB_LISTA_ESPERA = "revotech.com.ar"
-
-# ── System Prompt ─────────────────────────────────────────────────────────────
-_BLOQUE_PRELANZAMIENTO = f"""
-=== MODO PRELANZAMIENTO ACTIVO ===
-El producto todavia NO esta disponible para compra. Sale en aproximadamente {FECHA_LANZAMIENTO}.
-Hay unidades limitadas para los primeros clientes.
-
-TU OBJETIVO EN ESTE MODO:
-1. Entender el caso del cliente (caida, tiempo, situacion)
-2. Generarle interes y mostrarle que REVO aplica a su caso
-3. Pedirle el numero de WhatsApp para anotarlo en la lista de espera
-4. O redirigirlo a {WEB_LISTA_ESPERA} para que se anote ahi
-
-SCRIPT DE CIERRE PRELANZAMIENTO:
-"Todavia no salio a la venta, pero estamos armando la lista de espera para los primeros - van a tener prioridad y el mejor precio. Me pasas tu WhatsApp y te anoto?"
-
-Si prefiere la web: "Tambien podes anotarte en {WEB_LISTA_ESPERA} - ahi dejas tu mail y te avisamos antes que nadie."
-
-NUNCA digas que pueden comprar ahora. NUNCA mandes links de compra.
-El unico link valido es {WEB_LISTA_ESPERA} para registrarse en la lista.
-""" if MODO_PRELANZAMIENTO else ""
-
-_PASO5 = (
-    f"MODO PRELANZAMIENTO: Pedi el WhatsApp o redirigir a {WEB_LISTA_ESPERA} para la lista de espera."
-    if MODO_PRELANZAMIENTO else
-    f"Kit 90D como opcion mas inteligente. 15% primeros 100 clientes + 10% transferencia. Link: {CATALOGO['web']}"
-)
-
-_OBJECION_CUANDO = (
-    '"CUANDO SALE / CUANDO PUEDO COMPRAR" -> Decir la fecha aproximada y pedir el WhatsApp para la lista de espera.\n'
-    if MODO_PRELANZAMIENTO else ""
-)
-
-_PROCESO_PAGO = "" if MODO_PRELANZAMIENTO else """PROCESO POST-PAGO TRANSFERENCIA:
-Pedir de a uno, confirmar antes de seguir:
-1. Comprobante de pago
-2. Nombre completo
-3. Mail
-4. Provincia / Ciudad / CP / Calle y numero
-Al final resumir y confirmar pedido."""
-
-_NUNCA_PRELANZAMIENTO = (
-    "- Decir que el producto esta disponible para compra ahora (MODO PRELANZAMIENTO)\n"
-    if MODO_PRELANZAMIENTO else ""
-)
-
-SYSTEM_PROMPT = f"""Sos el agente de ventas de {CATALOGO['empresa']} ({CATALOGO['razon_social']}) para WhatsApp e Instagram DM.
-Tu unico objetivo: convertir. Sos un vendedor nato, no un bot de respuestas automaticas.
-Escribis siempre con acentos correctos en castellano rioplatense: a, e, i, o, u con tilde cuando corresponde, y la letra n con virgulilla.
-
-{_BLOQUE_PRELANZAMIENTO}
+# ── System Prompt ──────────────────────────────────────────────────────────────
+SYSTEM_PROMPT = f"""Sos Nicolás, el agente de ventas de {CATALOGO['empresa']} ({CATALOGO['razon_social']}) para Instagram y WhatsApp.
+Tu único objetivo: calificar al cliente y mandarlo a la web. No cerrás ventas por acá.
+Escribís siempre con acentos correctos: á, é, í, ó, ú, ñ, ¿, ¡
 
 CANALES OFICIALES:
-Web: {CATALOGO['web']} | Instagram: {CATALOGO['instagram']} | Mercado Libre: buscar "REVO Revotech" | Email: {CATALOGO['email']}
-Solo ecommerce, sin local fisico ni revendedores. Directo de fabrica al cliente.
+Web: {CATALOGO['web']} | Instagram: {CATALOGO['instagram']} | Email: {CATALOGO['email']}
+Solo ecommerce, sin local físico ni revendedores.
 
-GARANTIA - REGLA CRITICA:
-La garantia de devolucion total de 90 dias aplica SOLO por compra en revotech.com.ar.
-En Mercado Libre NO aplica la garantia por politicas de la plataforma.
-Ante consulta sobre ML: "En ML nos encontras, pero la garantia de 90 dias solo aplica en revotech.com.ar. Para el respaldo completo, conviene la web."
+GARANTÍA — REGLA CRÍTICA:
+La garantía de devolución total de 90 días aplica SOLO por compra en revotech.com.ar.
+En Mercado Libre NO aplica.
 
-REGLAS DE COMUNICACION - INAMOVIBLES:
-- Maximo 2-3 lineas por mensaje
-- Si tenes mas para decir, corta con [MSG] para simular mensajes separados de WhatsApp
-- NUNCA mandes bloques de texto largos
-- Usa el nombre del cliente cuando lo sabes
+REGLAS DE COMUNICACIÓN — INAMOVIBLES:
+- Máximo 2-3 líneas por mensaje
+- Si tenés más para decir, cortá con [MSG] para simular mensajes separados
+- NUNCA mandés bloques de texto largos
+- Usá el nombre del cliente cuando lo sabés
 - Sin emojis. Tono directo, cercano, tuteo
-- Cuando el cliente este listo: cerra. No sigas explicando
-- No insistas mas de una vez por objecion
-- Detecta el idioma del cliente y responde en ese idioma
+- Escribís siempre con acentos: á, é, í, ó, ú, ñ
+- Detectá el idioma del cliente y respondé en ese idioma
+
+FUERA DE TEMA:
+Si el cliente pregunta algo que no tiene nada que ver con el cabello o con REVO, respondé SOLO:
+"Solo puedo ayudarte con consultas sobre REVO. ¿Tenés alguna pregunta sobre el producto?"
+Nada más. No explicás, no desarrollás.
+
+PREGUNTAS DE CREDIBILIDAD (ingredientes, ANMAT, dermatólogos, nunca usé algo similar, etc.):
+Respondé en UNA línea corta y mandá a la web.
+Ejemplo: "Sí, tenemos certificación ANMAT. Todos los detalles en revotech.com.ar"
+Ejemplo: "Es el primer sistema de dos frentes para cabello en el mercado. Todo en revotech.com.ar"
 
 SECUENCIA DE VENTA:
 
-PASO 1 - ENTENDER EL CASO
-Pregunta: tiempo de caida, tipo (progresiva o de golpe), diagnostico medico previo.
-No vendas nada todavia.
+PASO 1 — APERTURA
+Preguntá el estado del cabello del cliente. No vendas nada todavía.
 
-PASO 2 - VALIDAR QUE REVO APLICA
-Si menciona alopecia avanzada, tratamiento oncologico o autoinmune: aclarar que REVO no reemplaza tratamiento medico.
+PASO 2 — CALIFICACIÓN (1-2 preguntas)
+Según la respuesta: tiempo de caída, si es progresiva o fue de golpe.
+Validá que REVO aplica al caso.
+Si menciona alopecia avanzada u oncológico: aclará que no reemplaza tratamiento médico.
 
-PASO 3 - EXPLICAR EL SISTEMA (maximo 3 lineas)
-BR1 actua en el foliculo desde afuera. CR1 da soporte interno desde adentro.
-Es un sistema de 90 dias, no un producto suelto.
+PASO 3 — PROPUESTA BREVE
+BR1 actúa en el folículo desde afuera. CR1 da soporte interno.
+Sistema de 90 días con garantía de devolución total.
 
-PASO 4 - GARANTIA + FRICCION POSITIVA
-Explica la garantia del Kit 90D con las 3 condiciones.
-Luego pregunta SIEMPRE: "Una pregunta: hace cuanto notas la caida? Es progresiva o fue de golpe?"
-
-PASO 5 - CIERRE
-{_PASO5}
-
-PASO 6 - LEAD FRIO
-Si el cliente dejo de responder, el operador usa /lf para generar el mensaje de seguimiento.
+PASO 4 — CIERRE EN LA WEB
+→ Mandá a revotech.com.ar para ver resultados y comprar con garantía de 90 días.
 
 PERFILES DE CLIENTE:
-MARTIN (28-35, prevencion): "Actuar antes de que sea visible es la ventaja."
+MARTÍN (28-35, prevención): "Actuar antes de que sea visible es la ventaja."
 DIEGO (33-42, ya lo ve): "Ya lo notaste. Lo que probaste antes era un producto. REVO es un sistema."
-ROBERTO (43-55, perdida visible): "El foliculo no desaparece, se apaga. Todavia hay margen."
+ROBERTO (43-55, pérdida visible): "El folículo no desaparece, se apaga. Todavía hay margen."
 
 OBJECIONES:
-{_OBJECION_CUANDO}"ES CARO" -> "Son $2.221 por dia con garantia de devolucion. Una sola vez."
-"LO PIENSO" -> "Entiendo. Los primeros 100 tienen 15% activo. Quedan pocos lugares."
-"YA PROBE ALGO" -> "Era un producto suelto. REVO es un sistema de dos frentes simultaneos."
-"TIENEN EN ML?" -> "Si, estamos. Pero la garantia solo aplica en la web. Para el respaldo completo, revotech.com.ar"
+"ES CARO" → "Son $2.221 por día con garantía de devolución. Todo en revotech.com.ar"
+"LO PIENSO" → "Entiendo. Los primeros 100 tienen 15% activo. revotech.com.ar"
+"YA PROBÉ ALGO" → "Era un producto suelto. REVO es un sistema de dos frentes. Mirá los resultados en revotech.com.ar"
+"TIENEN EN ML?" → "Sí, estamos. Pero la garantía solo aplica en la web. revotech.com.ar"
 
-{_PROCESO_PAGO}
-
-CLIENTES QUE YA COMPRARON:
-"Dame tu nombre o numero de orden y te busco el estado."
-
-LO QUE NUNCA HACES:
-- Prometer recuperacion de cabello perdido
-- Prometer resultados antes del dia 60
-- Urgencias falsas (solo el descuento 100 clientes es real)
-- Parrafos largos
+LO QUE NUNCA HACÉS:
+- Cerrar ventas por Instagram o WhatsApp
+- Prometer recuperación de cabello perdido
+- Prometer resultados antes del día 60
+- Párrafos largos
 - Emojis
 - Revelar proveedores o costos internos
-- Inventar metricas o resenas
-{_NUNCA_PRELANZAMIENTO}"""
+- Inventar métricas o reseñas
+- Responder preguntas que no tienen nada que ver con REVO o el cabello
+"""
 
-BIENVENIDA = "Hola! Que te trae por aca? Estas buscando frenar la caida o ya la venis notando hace rato?"
+BIENVENIDA = "Hola, acá Nicolás de REVO. Contame, ¿qué estás notando con tu cabello últimamente?"
 
-# ── Herramientas ──────────────────────────────────────────────────────────────
+# ── Herramientas ───────────────────────────────────────────────────────────────
 TOOLS = [
     {
         "name": "listar_productos",
@@ -211,7 +165,7 @@ TOOLS = [
     },
     {
         "name": "calcular_precio_final",
-        "description": "Calcula precio final con descuentos. Usar cuando el cliente pregunta cuanto pagaria.",
+        "description": "Calcula precio final con descuentos.",
         "input_schema": {
             "type": "object",
             "properties": {
@@ -239,11 +193,9 @@ def listar_productos() -> dict:
             "descripcion": p["descripcion"],
         }
         if p.get("incluye_garantia"):
-            entry["garantia"] = "Devolucion 100% - SOLO por compra en revotech.com.ar (no aplica en ML)"
+            entry["garantia"] = "Devolucion 100% — SOLO por compra en revotech.com.ar"
         if p.get("envio_gratis"):
             entry["envio"] = "Gratis"
-        if p.get("promo_lanzamiento", {}).get("activa"):
-            entry["promo"] = p["promo_lanzamiento"]["descripcion"]
         productos.append(entry)
     return {"empresa": CATALOGO["empresa"], "productos": productos}
 
@@ -257,25 +209,11 @@ def obtener_producto(id_producto: str) -> dict:
                 "descripcion": p["descripcion"],
                 "precio_lista": f"${p['precio']:,}".replace(",", "."),
                 "certificacion": p.get("certificacion"),
-                "aprobado_dermatologos": p.get("aprobado_dermatologos"),
             }
-            if "ingredientes" in p:
-                result["ingredientes"] = p["ingredientes"]
-            if "contenido" in p:
-                result["contenido"] = p["contenido"]
-            if p.get("precio_por_dia"):
-                result["costo_por_dia"] = f"${p['precio_por_dia']:,}".replace(",", ".")
             if p.get("incluye_garantia"):
-                result["garantia"] = "Devolucion 100% - SOLO compra en revotech.com.ar. En ML NO aplica."
+                result["garantia"] = "Devolucion 100% — SOLO compra en revotech.com.ar. En ML NO aplica."
             if p.get("envio_gratis"):
                 result["envio"] = "Gratis"
-            if p.get("promo_lanzamiento", {}).get("activa"):
-                promo = p["promo_lanzamiento"]
-                precio_promo = int(p["precio"] * (1 - promo["descuento"]))
-                result["promo_lanzamiento"] = {
-                    "descripcion": promo["descripcion"],
-                    "precio_con_promo": f"${precio_promo:,}".replace(",", "."),
-                }
             return result
     return {"error": f"Producto '{id_producto}' no encontrado."}
 
@@ -295,21 +233,14 @@ def calcular_precio_final(id_producto: str, metodo_pago: str) -> dict:
             if metodo_pago == "transferencia":
                 ahorro = int(precio_final * CATALOGO["descuento_transferencia"])
                 precio_final -= ahorro
-                descuentos.append(f"10% transferencia (ahorras ${ahorro:,})".replace(",", "."))
+                descuentos.append("10% transferencia")
 
-            ahorro_total = precio_base - precio_final
-            result = {
+            return {
                 "nombre": p["nombre"],
                 "precio_lista": f"${precio_base:,}".replace(",", "."),
                 "descuentos": descuentos or ["Sin descuento"],
                 "precio_final": f"${precio_final:,}".replace(",", "."),
-                "ahorro_total": f"${ahorro_total:,}".replace(",", "."),
             }
-            if p.get("envio_gratis") or precio_final >= CATALOGO["envio_gratis_desde"]:
-                result["envio"] = "Gratis"
-            else:
-                result["envio"] = f"${CATALOGO['costo_envio']:,}".replace(",", ".")
-            return result
     return {"error": f"Producto '{id_producto}' no encontrado."}
 
 
@@ -319,9 +250,7 @@ def obtener_garantia() -> dict:
         "producto": "Kit 90 Dias",
         "cobertura": g["cobertura"],
         "condiciones": g["condiciones"],
-        "exclusiones": g["exclusiones"],
-        "canal_valido": "SOLO revotech.com.ar - en Mercado Libre NO aplica",
-        "nota": "Cumplidas las 3 condiciones: devolucion total sin cuestionamientos.",
+        "canal_valido": "SOLO revotech.com.ar — en Mercado Libre NO aplica",
     }
 
 
@@ -337,17 +266,7 @@ def ejecutar_herramienta(nombre: str, params: dict) -> str:
     return json.dumps({"error": f"Herramienta desconocida: {nombre}"})
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
-def get_lead_frio(nombre: str = "") -> str:
-    n = f"Hola {nombre}." if nombre else "Hola."
-    return (
-        f"{n} Quedo pendiente tu consulta sobre REVO. "
-        "Los primeros 100 clientes tienen 15% de descuento activo "
-        "- quedan pocos lugares con ese precio. "
-        "Seguis evaluando o te quedo alguna duda puntual?"
-    )
-
-
+# ── Helpers ────────────────────────────────────────────────────────────────────
 def format_output(texto: str) -> None:
     mensajes = texto.split("[MSG]")
     for msg in mensajes:
@@ -362,28 +281,61 @@ def mostrar_estado_lead(lead: dict) -> None:
     print(f"  Nombre:   {lead['nombre'] or 'desconocido'}")
     print(f"  Estado:   {lead['estado']}")
     print(f"  Mensajes: {lead['mensajes_total']}")
-    print(f"  Compro:   {'SI' if lead['compro'] else 'no'}")
+    print(f"  Compró:   {'SÍ' if lead['compro'] else 'no'}")
     if lead['notas']:
         print(f"  Notas:    {lead['notas'].strip()}")
     print(f"{'─'*40}\n")
 
 
-# ── Loop principal ────────────────────────────────────────────────────────────
+def llamar_agente(messages: list) -> str:
+    while True:
+        respuesta = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=350,
+            system=[{"type": "text", "text": SYSTEM_PROMPT, "cache_control": {"type": "ephemeral"}}],
+            tools=TOOLS,
+            messages=messages,
+        )
+
+        if respuesta.stop_reason == "end_turn":
+            texto_respuesta = ""
+            for bloque in respuesta.content:
+                if bloque.type == "text":
+                    texto_respuesta = bloque.text
+            messages.append({"role": "assistant", "content": respuesta.content})
+            return texto_respuesta
+
+        elif respuesta.stop_reason == "tool_use":
+            messages.append({"role": "assistant", "content": respuesta.content})
+            resultados = []
+            for bloque in respuesta.content:
+                if bloque.type == "tool_use":
+                    resultado = ejecutar_herramienta(bloque.name, bloque.input)
+                    resultados.append({
+                        "type": "tool_result",
+                        "tool_use_id": bloque.id,
+                        "content": resultado,
+                    })
+            messages.append({"role": "user", "content": resultados})
+        else:
+            return "Disculpá, hubo un problema. Escribinos de nuevo."
+
+
+# ── Loop principal ─────────────────────────────────────────────────────────────
 def ejecutar_agente() -> None:
     leads = cargar_leads()
 
     print("\n" + "=" * 62)
-    print("  REVO - Agente de Ventas v3.0")
+    print("  REVO — Nicolás — Agente de Ventas v4.1")
     print("=" * 62)
     print("\nComandos:")
-    print("  /lead [id]    -> Cambiar de lead activo")
-    print("  /estado       -> Ver estado del lead actual")
-    print("  /compro       -> Marcar lead como comprado")
-    print("  /frio         -> Marcar lead como frio")
-    print("  /lf [nombre]  -> Generar mensaje de lead frio")
-    print("  /nota [texto] -> Agregar nota al lead")
-    print("  /reset        -> Reiniciar conversacion")
-    print("  salir         -> Terminar sesion")
+    print("  /lead [id]    → Cambiar de lead activo")
+    print("  /estado       → Ver estado del lead actual")
+    print("  /compro       → Marcar lead como comprado")
+    print("  /frio         → Marcar lead como frío")
+    print("  /nota [texto] → Agregar nota al lead")
+    print("  /reset        → Reiniciar conversación")
+    print("  salir         → Terminar sesión")
     print("─" * 62)
 
     lead_id = input("\nID del lead (Enter para 'prueba'): ").strip() or "prueba"
@@ -394,7 +346,7 @@ def ejecutar_agente() -> None:
     if lead["historial"]:
         for h in lead["historial"]:
             messages.append({"role": h["rol"], "content": h["mensaje"]})
-        print(f"\n[Retomando conversacion con '{lead_id}' - {lead['mensajes_total']} mensajes previos]\n")
+        print(f"\n[Retomando conversación con '{lead_id}' — {lead['mensajes_total']} mensajes previos]\n")
         mostrar_estado_lead(lead)
     else:
         messages = [{"role": "assistant", "content": BIENVENIDA}]
@@ -407,7 +359,7 @@ def ejecutar_agente() -> None:
             entrada = input("Vos: ").strip()
         except (EOFError, KeyboardInterrupt):
             guardar_leads(leads)
-            print("\n\nSesion cerrada. Leads guardados.")
+            print("\n\nSesión cerrada. Leads guardados.")
             break
 
         if not entrada:
@@ -415,7 +367,7 @@ def ejecutar_agente() -> None:
 
         if entrada.lower() in ("salir", "exit", "quit"):
             guardar_leads(leads)
-            print("\nAgente: Hasta luego. Empeza a ocuparte.")
+            print("\nAgente: Hasta luego.")
             break
 
         if entrada.lower().startswith("/lead"):
@@ -443,7 +395,7 @@ def ejecutar_agente() -> None:
         if entrada.lower() == "/frio":
             lead["estado"] = "frio"
             guardar_leads(leads)
-            print("\n[Lead marcado como FRIO]\n")
+            print("\n[Lead marcado como FRÍO]\n")
             continue
 
         if entrada.lower().startswith("/nota"):
@@ -454,30 +406,33 @@ def ejecutar_agente() -> None:
             print("\n[Nota guardada]\n")
             continue
 
-        if entrada.lower().startswith("/lf"):
-            parts = entrada.split(" ", 1)
-            nombre = parts[1].strip() if len(parts) > 1 else (lead["nombre"] or "")
-            msg = get_lead_frio(nombre)
-            lead["estado"] = "frio"
-            guardar_leads(leads)
-            print(f"\n--- MENSAJE LEAD FRIO ---\n{msg}\n─────────────────────────\n")
-            continue
-
         if entrada.lower() == "/reset":
             lead["historial"] = []
             lead["mensajes_total"] = 0
             lead["estado"] = "nuevo"
             lead["paso_secuencia"] = 1
+            lead["limite_alcanzado"] = False
             messages = [{"role": "assistant", "content": BIENVENIDA}]
             guardar_leads(leads)
-            print(f"\n[Conversacion reiniciada]\n\nAgente: {BIENVENIDA}\n")
+            print(f"\n[Conversación reiniciada]\n\nAgente: {BIENVENIDA}\n")
             continue
 
-        # Mensaje normal
+        # ── Límite de mensajes ─────────────────────────────────────────────────
+        if lead.get("limite_alcanzado"):
+            continue
+
+        if lead["mensajes_total"] >= LIMITE_MENSAJES:
+            lead["limite_alcanzado"] = True
+            lead["estado"] = "derivado_web"
+            actualizar_estado_lead(lead, "assistant", MENSAJE_LIMITE)
+            guardar_leads(leads)
+            print(f"\nAgente: {MENSAJE_LIMITE}\n")
+            continue
+
+        # ── Mensaje normal ─────────────────────────────────────────────────────
         actualizar_estado_lead(lead, "user", entrada)
         messages.append({"role": "user", "content": entrada})
 
-        # Detectar nombre simple
         if lead["nombre"] is None:
             for palabra in entrada.split():
                 if palabra[0].isupper() and len(palabra) > 2 and palabra.isalpha():
@@ -487,42 +442,11 @@ def ejecutar_agente() -> None:
         if lead["estado"] == "nuevo":
             lead["estado"] = "calificando"
 
-        while True:
-            respuesta = client.messages.create(
-                model="claude-opus-4-7",
-                max_tokens=1024,
-                system=[{"type": "text", "text": SYSTEM_PROMPT, "cache_control": {"type": "ephemeral"}}],
-                tools=TOOLS,
-                messages=messages,
-            )
-
-            if respuesta.stop_reason == "end_turn":
-                texto_respuesta = ""
-                for bloque in respuesta.content:
-                    if bloque.type == "text":
-                        texto_respuesta = bloque.text
-                format_output(texto_respuesta)
-                print()
-                messages.append({"role": "assistant", "content": respuesta.content})
-                actualizar_estado_lead(lead, "assistant", texto_respuesta)
-                guardar_leads(leads)
-                break
-
-            elif respuesta.stop_reason == "tool_use":
-                messages.append({"role": "assistant", "content": respuesta.content})
-                resultados = []
-                for bloque in respuesta.content:
-                    if bloque.type == "tool_use":
-                        resultado = ejecutar_herramienta(bloque.name, bloque.input)
-                        resultados.append({
-                            "type": "tool_result",
-                            "tool_use_id": bloque.id,
-                            "content": resultado,
-                        })
-                messages.append({"role": "user", "content": resultados})
-            else:
-                print(f"\n[stop_reason: {respuesta.stop_reason}]\n")
-                break
+        texto_respuesta = llamar_agente(messages)
+        format_output(texto_respuesta)
+        print()
+        actualizar_estado_lead(lead, "assistant", texto_respuesta)
+        guardar_leads(leads)
 
 
 if __name__ == "__main__":
